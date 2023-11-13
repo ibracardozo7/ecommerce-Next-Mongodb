@@ -1,4 +1,4 @@
-import NavBar from "@/components/NavBar";
+import NavBar from "../components/NavBar";
 import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Layout({ children }) {
