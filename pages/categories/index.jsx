@@ -3,6 +3,7 @@ import Layout from "../../components/Layout";
 import axios from "axios";
 
 const Categories = () => {
+  const [editedCategory, setEditedCategory] = useState(null);
   const [name, setName] = useState("");
   const [parentCategory, setParentCategory] = useState("");
   const [categories, setCategories] = useState([]);
@@ -14,20 +15,36 @@ const Categories = () => {
   const fetchCategories = () => {
     axios.get("/api/categories").then((res) => {
       setCategories(res.data);
-      console.log(categories);
     });
   };
   const saveCategory = async (ev) => {
     ev.preventDefault();
-    await axios.post("/api/categories", { name, parentCategory });
+    const data = { name, parentCategory };
+    if (editedCategory) {
+      data._id = editedCategory._id;
+      await axios.put("/api/categories", data);
+      setEditedCategory(null);
+    } else {
+      await axios.post("/api/categories", data);
+    }
     setName("");
     fetchCategories();
+  };
+
+  const editCategory = (category) => {
+    setEditedCategory(category);
+    setName(category.name);
+    setParentCategory(category.parent?._id);
   };
 
   return (
     <Layout>
       <h1>Categories</h1>
-      <label>New category name</label>
+      <label>
+        {editedCategory
+          ? `Edit category ${editedCategory.name}`
+          : "New category name"}
+      </label>
       <form onSubmit={saveCategory} className="flex gap-1">
         <input
           className="mb-0"
@@ -68,7 +85,12 @@ const Categories = () => {
                 <td>{category.name}</td>
                 <td>{category?.parent?.name}</td>
                 <td>
-                  <button className="btn-primary mr-1">Edit</button>
+                  <button
+                    onClick={() => editCategory(category)}
+                    className="btn-primary mr-1"
+                  >
+                    Edit
+                  </button>
                   <button className="btn-primary">Delete</button>
                 </td>
               </tr>
