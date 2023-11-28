@@ -15,21 +15,22 @@ export default async function handler(req, res) {
   }
 
   if (method === "POST") {
-    const { title, description, price } = req.body;
+    const { title, description, price, category } = req.body;
     // console.log(req.body);
     const productDoc = await Product.create({
       title,
       description,
       price,
+      category,
     });
     res.status(200).json(productDoc);
   }
 
   if (method === "PUT") {
-    const { title, description, price, _id } = req.body;
+    const { title, description, price, category, _id } = req.body;
     const productEdit = await Product.updateOne(
       { _id },
-      { title, description, price }
+      { title, description, price, category }
     );
     res.json(true);
   }
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
   if (method === "DELETE") {
     if (req.query?.id) {
       await Product.deleteOne({ _id: req.query.id });
-      res.json(true)
+      res.json(true);
     }
   }
 }

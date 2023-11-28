@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 const ProductForm = ({
@@ -8,25 +8,33 @@ const ProductForm = ({
   description: existingDescription,
   price: existingPrice,
   images,
+  category: existingCategory,
 }) => {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
+  const [category, setCategory] = useState(existingCategory || "");
   const [price, setPrice] = useState(existingPrice || "");
   const [goToProducts, setGoToProducts] = useState(false);
-
+  const [categories, setCategories] = useState([]);
   const router = useRouter();
+
+  useEffect(() => {
+    axios.get("/api/categories").then((res) => {
+      setCategories(res.data);
+    });
+  }, []);
 
   const saveProduct = async (e) => {
     e.preventDefault();
-    const data = { title, description, price };
+    const data = { title, description, price, category };
     if (_id) {
       // update
       await axios.put("/api/products", { ...data, _id });
     } else {
       // create
       await axios.post("/api/products", data);
-      setGoToProducts(true);
     }
+    setGoToProducts(true);
   };
 
   if (goToProducts) {
@@ -58,6 +66,16 @@ const ProductForm = ({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+      <label>Category</label>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}>
+        <option value="">Uncategorized</option>
+        {categories.length > 0 &&
+          categories.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
+      </select>
       <label>Photos</label>
       <div className="mb-2">
         <label className="w-24 h-24 cursor-pointer flex justify-center items-center text-sm gap-1 text-gray-500 rounded-lg bg-gray-200">
